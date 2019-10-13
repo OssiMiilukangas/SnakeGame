@@ -29,6 +29,7 @@ public class SnakeGame extends Application
     private int scoreCount = 0;
     private int snakePositionX = SNAKE_STARTING_POSITION_X; //snakes head position
     private int snakePositionY = SNAKE_STARTING_POSITION_Y;
+    private boolean gameRunning = true;
     private boolean appleEaten = false;
     private boolean moveInitialized = false;
 
@@ -220,27 +221,34 @@ public class SnakeGame extends Application
 
     public void gameOver()
     {
-        //remove all objects from screen and add game over texts
-        snakeGroup.getChildren().clear();
-
+        //add game over texts
         Label gameOverLabel = new Label("Game Over");
         gameOverLabel.setTranslateX(200);
         gameOverLabel.setTranslateY(150);
         gameOverLabel.setFont(Font.font("Arial", 40));
 
         Label gameOverScore = new Label("Your score was: " + scoreCount);
-        gameOverScore.setTranslateX(200);
+        gameOverScore.setTranslateX(205);
         gameOverScore.setTranslateY(200);
         gameOverScore.setFont(Font.font("Arial", 25));
-        snakeGroup.getChildren().addAll(gameOverLabel, gameOverScore);
+
+        Label gameOverSpacebar = new Label("(Press spacebar to continue)");
+        gameOverSpacebar.setTranslateX(180);
+        gameOverSpacebar.setTranslateY(250);
+        gameOverSpacebar.setFont(Font.font("Arial", 20));
+        snakeGroup.getChildren().addAll(gameOverLabel,
+                                        gameOverScore,
+                                        gameOverSpacebar);
 
         //set values to starting state
+        snakePositions.clear();
         snakeLenght = SNAKE_STARTING_LENGHT;
         scoreCount = 0;
         snakePositionX = SNAKE_STARTING_POSITION_X;
         snakePositionY = SNAKE_STARTING_POSITION_Y;
         snakeDirection = 0;
-
+        //set geme to not run so it knows not to leave game over screen
+        gameRunning = false;
     }
 
     public void start( Stage stage )
@@ -259,41 +267,51 @@ public class SnakeGame extends Application
         {
             pressedKeyCode = event.getCode();
 
-            //move only if a move hasn't already been initialized in current frame
-            if(moveInitialized == false)
+            //keys switch directions when game is on, else they restart the game
+            if(gameRunning == true)
             {
-                //switch directions only if snake isn't moving to opposite direction,
-                //snake can't go straight backwards
-                switch (pressedKeyCode)
+                //you can move only if a move hasn't already been initialized
+                //in the current frame
+                if(moveInitialized == false)
                 {
-                    case RIGHT:
-                        if(snakeDirection != 1)
-                        {
-                            snakeDirection = 0;
-                        }
-                        break;
-                    case LEFT:
-                        if(snakeDirection != 0)
-                        {
-                            snakeDirection = 1;
-                        }
-                        break;
-                    case UP:
-                        if(snakeDirection != 3)
-                        {
-                            snakeDirection = 2;
-                        }
-                        break;
-                    case DOWN:
-                        if(snakeDirection != 2)
-                        {
-                            snakeDirection = 3;
-                        }
-                        break;
-                    default:
-                        break;
+                    //switch directions only if snake isn't moving to opposite
+                    //direction, snake can't go straight backwards
+                    switch (pressedKeyCode)
+                    {
+                        case RIGHT:
+                            if(snakeDirection != 1)
+                            {
+                                snakeDirection = 0;
+                            }
+                            break;
+                        case LEFT:
+                            if(snakeDirection != 0)
+                            {
+                                snakeDirection = 1;
+                            }
+                            break;
+                        case UP:
+                            if(snakeDirection != 3)
+                            {
+                                snakeDirection = 2;
+                            }
+                            break;
+                        case DOWN:
+                            if(snakeDirection != 2)
+                            {
+                                snakeDirection = 3;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                moveInitialized = true;
                 }
-            moveInitialized = true;
+            }
+            else if(pressedKeyCode == KeyCode.SPACE)
+            {
+                gameRunning = true;
+                initGame();
             }
       });
 
@@ -304,10 +322,15 @@ public class SnakeGame extends Application
           @Override
           public void handle(long currentNanoTime)
           {
-              if(frameCount % 8 == 0)  //control game speed with executing
-              {                         //only at every 12th frame
-                  snakeMove();
-                  testForCollisions();
+              //control game speed with executing only at every 8th frame
+              if(frameCount % 8 == 0)
+              {
+                  //execute only when game is on
+                  if(gameRunning == true)
+                  {
+                    snakeMove();
+                    testForCollisions();
+                  }
               }
               frameCount++;
           }
