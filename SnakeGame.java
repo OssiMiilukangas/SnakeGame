@@ -16,28 +16,31 @@ public class SnakeGame extends Application
 {
     private final int SCENE_WIDHT = 600;
     private final int SCENE_HEIGHT = 400;
-    private final int BLOCK_SIZE = 20; //size for each block of snakes body
+    private final int BLOCK_SIZE = 20;      //size for each block of snakes body
     private final int SNAKE_STARTING_LENGHT = 3;
-    private final int SNAKE_STARTING_POSITION_X = SCENE_WIDHT / 2; //set snakes position to
-    private final int SNAKE_STARTING_POSITION_Y = SCENE_HEIGHT / 2; //the middle of the map
+    //set snakes starting position to the middle of the map
+    private final int SNAKE_STARTING_POSITION_X = SCENE_WIDHT / 2;
+    private final int SNAKE_STARTING_POSITION_Y = SCENE_HEIGHT / 2;
 
-    private int snakeLenght = SNAKE_STARTING_LENGHT;    //variable lenght of snake
+    private int snakeLenght = SNAKE_STARTING_LENGHT;  //variable lenght of snake
     private int applePositionX = 0;
     private int applePositionY = 0;
-    private int tempPositionX = 0; //temporary apple position for making
-    private int tempPositionY = 0; //the random values dividable with 20
+    private int tempPositionX = 0;        //temporary apple position for making
+    private int tempPositionY = 0;        //the random values dividable with 20
     private int scoreCount = 0;
-    private int snakePositionX = SNAKE_STARTING_POSITION_X; //snakes head position
+    //positon of the head of snake
+    private int snakePositionX = SNAKE_STARTING_POSITION_X;
     private int snakePositionY = SNAKE_STARTING_POSITION_Y;
+    private int snakeDirection = 0;      //0 = right, 1 = left, 2 = up, 3 = down
     private boolean gameRunning = true;
     private boolean appleEaten = false;
     private boolean moveInitialized = false;
+    private KeyCode pressedKeyCode = KeyCode.RIGHT;  //snakes starting direction
 
-    private int snakeDirection = 0; //0 = right, 1 = left, 2 = up, 3 = down
-    private KeyCode pressedKeyCode = KeyCode.RIGHT; //snakes starting direction
-                                                    //is right
-    AnimationTimer animationTimer;
+    //in this group indexes 0-3 are reserved for borders, 4: scoreLabel,
+    //5: apple, and the rest 6+: snake.
     Group snakeGroup = new Group();
+    AnimationTimer animationTimer;
 
     //arraylist to remember positions of snakes blocks
     private ArrayList<Point2D> snakePositions = new ArrayList<>();
@@ -65,12 +68,14 @@ public class SnakeGame extends Application
 
         newApple();
 
-        for(int i = 0; i < snakeLenght; i++)    //setup snake for first frame
+        //setup snake for first frame
+        for(int i = 0; i < snakeLenght; i++)
         {
             Rectangle snakeBody = new Rectangle(snakePositionX - BLOCK_SIZE * i,
                                                 snakePositionY,
                                                 BLOCK_SIZE - 1, BLOCK_SIZE - 1);
 
+            //add all snakes positions to arraylist
             snakePositions.add(i, new Point2D(snakePositionX - BLOCK_SIZE * i,
                                            snakePositionY));
 
@@ -92,7 +97,7 @@ public class SnakeGame extends Application
         applePositionX = tempPositionX * BLOCK_SIZE;
         applePositionY = tempPositionY * BLOCK_SIZE;
 
-        //test that apples position isn't inside snake
+        //test that apples new position isn't inside of snake
         for(int i = 0; i < snakePositions.size(); i++)
         {
             if(applePositionX == snakePositions.get(i).getX() &&
@@ -106,7 +111,7 @@ public class SnakeGame extends Application
                                         BLOCK_SIZE - 1, BLOCK_SIZE - 1);
         apple.setFill(Color.RED);
 
-        //first run we need to add object, otherwise replace it
+        //first run we need to add the apple, otherwise replace it
         if(appleEaten == true)
         {
             snakeGroup.getChildren().set(5, apple);
@@ -173,13 +178,12 @@ public class SnakeGame extends Application
                 break;
         }
 
-        //add snakes new position to arraylist
+        //add snakes new head position to arraylist
         snakePositions.add(0, new Point2D(snakePositionX, snakePositionY));
         moveInitialized = false;
 
         //System.out.print(snakePositions.get(0) + " ");
         //System.out.println(snakePositions.get(snakePositions.size() - 1));
-
     }
     public void testForCollisions()
     {
@@ -232,8 +236,8 @@ public class SnakeGame extends Application
         gameOverScore.setTranslateY(200);
         gameOverScore.setFont(Font.font("Arial", 25));
 
-        Label gameOverSpacebar = new Label("(Press spacebar to continue)");
-        gameOverSpacebar.setTranslateX(180);
+        Label gameOverSpacebar = new Label("(Press spacebar to restart)");
+        gameOverSpacebar.setTranslateX(190);
         gameOverSpacebar.setTranslateY(250);
         gameOverSpacebar.setFont(Font.font("Arial", 20));
         snakeGroup.getChildren().addAll(gameOverLabel,
@@ -247,7 +251,7 @@ public class SnakeGame extends Application
         snakePositionX = SNAKE_STARTING_POSITION_X;
         snakePositionY = SNAKE_STARTING_POSITION_Y;
         snakeDirection = 0;
-        //set geme to not run so it knows not to leave game over screen
+        //set game to not run so it knows not to leave game over screen
         gameRunning = false;
     }
 
@@ -322,17 +326,17 @@ public class SnakeGame extends Application
           @Override
           public void handle(long currentNanoTime)
           {
-              //control game speed with executing only at every 8th frame
-              if(frameCount % 8 == 0)
+              //execute only when game is on
+              if(gameRunning == true)
               {
-                  //execute only when game is on
-                  if(gameRunning == true)
+                  //control game speed with executing only at every 8th frame
+                  if(frameCount % 8 == 0)
                   {
                     snakeMove();
                     testForCollisions();
                   }
+                  frameCount++;
               }
-              frameCount++;
           }
       };
       animationTimer.start();
